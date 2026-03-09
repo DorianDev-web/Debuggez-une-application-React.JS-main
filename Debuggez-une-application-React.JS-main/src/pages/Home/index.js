@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Menu from "../../containers/Menu";
 import ServiceCard from "../../components/ServiceCard";
 import EventCard from "../../components/EventCard";
@@ -13,7 +14,15 @@ import Modal from "../../containers/Modal";
 import { useData } from "../../contexts/DataContext";
 
 const Page = () => {
-  const {last} = useData()
+  const { data } = useData();
+
+  const last = useMemo(() => {
+    const events = data?.events ? [...data.events] : [];
+    if (!events.length) return null;
+
+    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return events[0];
+  }, [data?.events]);
   return <>
     <header>
       <Menu />
@@ -116,13 +125,19 @@ const Page = () => {
     <footer className="row">
       <div className="col presta">
         <h3>Notre derniére prestation</h3>
-        <EventCard
-          imageSrc={last?.cover}
-          title={last?.title}
-          date={new Date(last?.date)}
-          small
-          label="boom"
-        />
+        {last ? (
+          <EventCard
+            imageSrc={last.cover}
+            imageAlt={last.title}
+            title={last.title}
+            date={new Date(last.date)}
+            small
+            label={last.type}
+            periode={last.periode}
+          />
+        ) : (
+        <div>Aucun événement réalisé pour le moment</div>
+        )}
       </div>
       <div className="col contact">
         <h3>Contactez-nous</h3>
